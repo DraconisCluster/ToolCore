@@ -28,6 +28,9 @@ namespace ToolCore.Session
         {
             try
             {
+                var gate = IsDedicated;
+                var tickMod60 = TickMod60;
+                var tickMod20 = TickMod20;
                 for (int i = 0; i < GridList.Count; i++)
                 {
                     var gridComp = GridList[i];
@@ -45,7 +48,22 @@ namespace ToolCore.Session
 
                     for (int j = 0; j < gridComp.ToolComps.Count; j++)
                     {
-                        UpdateComp(gridComp.ToolComps[j]);
+                        var comp = gridComp.ToolComps[j];
+
+                        //DS only: idle comps run once a second on their CompTick60 slot.
+                        //Same slot as needsPushing, and 20|60 keeps the power poll alive.
+                        //Activated alone doesn't hold full rate - it latches through off/unpowered.
+                        //Activated-but-idle comps drop to their CompTick20 slot, which for
+                        //20-divisible intervals covers every workTick (see ctor).
+                        if (gate && comp.CompTick60 != tickMod60
+                            && (!(comp.Activated && comp.Enabled && comp.Powered && comp.Functional)
+                                || comp.AlignedUpdateInterval && comp.CompTick20 != tickMod20)
+                            && !comp.GunBase.WantsToShoot && !comp.GunBase.Shooting
+                            && !comp.TrackTargets && !comp.WasHitting && !comp.Working
+                            && !comp.UpdatePower && !comp.Dirty && !comp.Broken && comp.FullInit)
+                            continue;
+
+                        UpdateComp(comp);
                     } //Tools loop
 
                 } //Grids loop
@@ -332,8 +350,8 @@ namespace ToolCore.Session
             var worldUp = Vector3D.Zero;
             //CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
 
-            var fill = comp.Inventory.VolumeFillFactor;
-            var needsPushing = comp.IsBlock ? comp.CompTick60 == TickMod60 && (fill > 0f || comp.Yields.Count > 0) : comp.CompTick60 == TickMod60 && comp.Yields.Count > 0;
+            //fill only matters on the push slot
+            var needsPushing = comp.CompTick60 == TickMod60 && (comp.IsBlock ? comp.Inventory.VolumeFillFactor > 0f || comp.Yields.Count > 0 : comp.Yields.Count > 0);
             if (IsServer && comp.Mode != ToolMode.Weld && needsPushing)
             {
                 if (comp.IsBlock)
