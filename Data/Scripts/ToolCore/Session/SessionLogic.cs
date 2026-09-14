@@ -386,6 +386,10 @@ namespace ToolCore.Session
                                 }
                             }
 
+                            //pruning queries append
+                            Entities.Clear();
+                            _lineOverlaps.Clear();
+
                             var line = false;
                             var rayLength = toolValues.Length;
                             switch (def.EffectShape)
@@ -409,8 +413,6 @@ namespace ToolCore.Session
                                         rayLength *= hitInfo.Fraction;
                                     }
                                     break;
-                                default:
-                                    continue;
                             }
 
                             var damageType = (int)def.ToolType < 2 ? MyDamageType.Drill : (int)def.ToolType < 4 ? MyDamageType.Grind : MyDamageType.Weld;
