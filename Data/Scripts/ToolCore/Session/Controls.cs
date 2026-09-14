@@ -295,7 +295,7 @@ namespace ToolCore.Session
                 return;
 
             var wasActivated = comp._activated;
-            comp._activated = false;
+            comp.Activated = false;
 
             if (!_session.IsMultiPlayer || comp._activated == wasActivated)
                 return;

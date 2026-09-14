@@ -82,8 +82,9 @@ namespace ToolCore.Session
                             comp.ChangeGrid();
                         }
 
+                        //goto PostUpdate, not continue - post-update must run every tick
                         if (!comp.Functional)
-                            continue;
+                            goto PostUpdate;
 
                         if (!comp.FullInit)
                             comp.FunctionalInit();
@@ -106,7 +107,7 @@ namespace ToolCore.Session
                             comp.UpdatePower = false;
                         }
                         if (!comp.Powered || !isBlock && ((IMyCharacter)comp.Parent).SuitEnergyLevel <= 0)
-                            continue;
+                            goto PostUpdate;
 
                         if (comp.Dirty)
                         {
@@ -114,7 +115,7 @@ namespace ToolCore.Session
                         }
 
                         if (isBlock && !block.Enabled)
-                            continue;
+                            goto PostUpdate;
                         var worldPos = Vector3D.Zero;
                         var worldForward = Vector3D.Zero;
                         var worldUp = Vector3D.Zero;
@@ -281,11 +282,23 @@ namespace ToolCore.Session
                         }
 
                         if (!shooting && !turretAligned)
-                            continue;
-                        if (activated && comp.GridComp.LastSafezoneTick != Tick)
-                            comp.GridComp.UpdateGridSafezone();
-                        if (comp.GridComp.NearSafezone && !MySessionComponentSafeZones.IsActionAllowed(comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, (int)comp.Mode)))
-                            comp.Activated = false;
+                            goto PostUpdate;
+
+                        if (activated)
+                        {
+                            var gridComp = comp.GridComp;
+                            if (gridComp != null && gridComp.LastSafezoneTick != Tick)
+                                gridComp.UpdateGridSafezone();
+
+                            //MySafeZoneAction is prohibited
+                            var modeAction = (int)comp.Mode;
+                            var restricted = gridComp == null || gridComp.NearSafezone || ((int)MySessionComponentSafeZones.AllowedActions & modeAction) != modeAction;
+                            if (restricted && !MySessionComponentSafeZones.IsActionAllowed(comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, modeAction)))
+                            {
+                                comp.Activated = false;
+                                goto PostUpdate;
+                            }
+                        }
 
                         var ownerId = isBlock ? block.OwnerId : handTool.OwnerIdentityId;
 
@@ -299,7 +312,7 @@ namespace ToolCore.Session
                                 {
                                     comp.Action = action;
                                     Networking.SendPacketToServer(new SbyteUpdatePacket(comp.ToolEntity.EntityId, FieldType.Action, (int)comp.Action));
-                                    continue;
+                                    goto PostUpdate;
                                 }
                             }
                         }
@@ -340,10 +353,10 @@ namespace ToolCore.Session
                         }
 
                         if (!workTick)
-                            continue;
+                            goto PostUpdate;
 
                         if (comp.ActiveThreads > 0 || !comp.GridsTask.IsComplete || !comp.CallbackComplete)
-                            continue;
+                            goto PostUpdate;
                         //TODO: fix hanging debug draws when block is done/turret is done working
                         comp.DrawBoxes.ClearList();
 
@@ -379,7 +392,7 @@ namespace ToolCore.Session
                             {
                                 comp.GridData.Position = worldPos;
                                 comp.OnGetBlocksComplete();
-                                continue;
+                                goto PostUpdate;
                             }
                         }
 
@@ -407,7 +420,7 @@ namespace ToolCore.Session
                                 }
                                 break;
                             default:
-                                continue;
+                                goto PostUpdate;
                         }
 
                         var damageType = (int)def.ToolType < 2 ? MyDamageType.Drill : (int)def.ToolType < 4 ? MyDamageType.Grind : MyDamageType.Weld;
@@ -667,7 +680,7 @@ namespace ToolCore.Session
 
                         var gridData = comp.GridData;
                         if (gridData.Grids.Count == 0)
-                            continue;
+                            goto PostUpdate;
 
                         gridData.Position = worldPos;
                         gridData.Forward = worldForward;
@@ -679,6 +692,7 @@ namespace ToolCore.Session
                         Entities.Clear();
                         _lineOverlaps.Clear();
                         #endregion
+                    PostUpdate:
                         if (!comp.AvActive && (comp.AvState & def.EventFlags) > 0)
                         {
                             AvComps.Add(comp);
