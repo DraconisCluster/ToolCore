@@ -1045,6 +1045,8 @@ namespace ToolCore.Comp
 
             Clean();
 
+            ToolSession.Instance.ToolMap.Remove(ToolEntity.EntityId);
+
             if (IsBlock)
             {
                 BlockTool.EnabledChanged -= EnabledChanged;
@@ -1052,11 +1054,7 @@ namespace ToolCore.Comp
 
                 if (!ToolSession.Instance.IsDedicated)
                     BlockTool.AppendingCustomInfo -= AppendingCustomData;
-
-                return;
             }
-
-            ToolSession.Instance.ToolMap.Remove(ToolEntity.EntityId);
         }
 
         internal void Clean()
