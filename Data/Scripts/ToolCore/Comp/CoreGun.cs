@@ -112,8 +112,13 @@ namespace ToolCore.Comp
             }
             if (!_comp.Powered)
             {
-                status = MyGunStatusEnum.OutOfPower;
-                return false;
+                if (_comp.IsBlock && _comp.IsPowered())
+                    _comp.UpdateAvState(Trigger.Powered, true);
+                else
+                {
+                    status = MyGunStatusEnum.OutOfPower;
+                    return false;
+                }
             }
             if (!_comp.ModeMap[_comp.Mode].Definition.ActionMap.ContainsKey((ToolComp.ToolAction)action))
             {
