@@ -21,6 +21,21 @@ namespace ToolCore.Utils
     {
         internal static T CastHax<T>(T typeRef, object castObj) => (T)castObj;
 
+        private static readonly object _boxedDrill = (int)ToolMode.Drill;
+        private static readonly object _boxedWeld = (int)ToolMode.Weld;
+        private static readonly object _boxedGrind = (int)ToolMode.Grind;
+
+        internal static object BoxedSafezoneAction(ToolMode mode)
+        {
+            switch (mode)
+            {
+                case ToolMode.Drill: return _boxedDrill;
+                case ToolMode.Weld: return _boxedWeld;
+                case ToolMode.Grind: return _boxedGrind;
+                default: return (int)mode;
+            }
+        }
+
         private static readonly List<MyPhysicalInventoryItem> _tmpItemList = new List<MyPhysicalInventoryItem>();
 
         internal static void EmptyBlockInventories(MyCubeBlock block, MyInventory toolInventory)
