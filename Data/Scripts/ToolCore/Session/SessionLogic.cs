@@ -396,6 +396,10 @@ namespace ToolCore.Session
                             }
                         }
 
+                        //pruning queries append
+                        Entities.Clear();
+                        _lineOverlaps.Clear();
+
                         var line = false;
                         var rayLength = toolValues.Length;
                         switch (def.EffectShape)
