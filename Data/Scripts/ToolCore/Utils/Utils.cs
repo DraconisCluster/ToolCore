@@ -21,6 +21,19 @@ namespace ToolCore.Utils
     {
         internal static T CastHax<T>(T typeRef, object castObj) => (T)castObj;
 
+        private static readonly object[] _boxedModes = BoxModes(); //indexed by (int)ToolMode
+
+        private static object[] BoxModes()
+        {
+            var boxed = new object[17];
+            boxed[(int)ToolMode.Drill] = (int)ToolMode.Drill;
+            boxed[(int)ToolMode.Weld] = (int)ToolMode.Weld;
+            boxed[(int)ToolMode.Grind] = (int)ToolMode.Grind;
+            return boxed;
+        }
+
+        internal static object BoxedSafezoneAction(ToolMode mode) => _boxedModes[(int)mode];
+
         private static readonly List<MyPhysicalInventoryItem> _tmpItemList = new List<MyPhysicalInventoryItem>();
 
         internal static void EmptyBlockInventories(MyCubeBlock block, MyInventory toolInventory)

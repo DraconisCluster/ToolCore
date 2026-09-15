@@ -873,9 +873,10 @@ namespace ToolCore.Comp
         {
             var session = ToolSession.Instance;
             var tryUpdate = ToolSession.Tick - LastPushTick > 1200;
-            foreach (var ore in Yields.Keys)
+            foreach (var item in Yields)
             {
-                var gross = Yields[ore];
+                var ore = item.Key;
+                var gross = item.Value;
                 if (!LastPushSucceeded && !tryUpdate && FailedPushes.Contains(ore))
                 {
                     session.TempItems[ore] = gross;
@@ -943,9 +944,10 @@ namespace ToolCore.Comp
         {
             var session = ToolSession.Instance;
             var tryUpdate = ToolSession.Tick - LastPushTick > 1200;
-            foreach (var ore in Yields.Keys)
+            foreach (var item in Yields)
             {
-                var gross = Yields[ore];
+                var ore = item.Key;
+                var gross = item.Value;
                 var oreOb = MyObjectBuilderSerializer.CreateNewObject<MyObjectBuilder_Ore>(ore);
                 var itemDef = MyDefinitionManager.Static.GetPhysicalItemDefinition(oreOb);
                 var itemVol = itemDef.Volume;
