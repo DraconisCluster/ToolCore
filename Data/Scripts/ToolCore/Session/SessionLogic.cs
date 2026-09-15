@@ -24,6 +24,11 @@ namespace ToolCore.Session
 {
     internal partial class ToolSession
     {
+        private static readonly MyStringHash RockHash = MyStringHash.GetOrCompute("Rock");
+        private static readonly MyStringHash CharacterHash = MyStringHash.GetOrCompute("Character");
+        private static readonly MyStringHash TreeHash = MyStringHash.GetOrCompute("Tree");
+        private static readonly MyStringHash MetalHash = MyStringHash.GetOrCompute("Metal");
+
         internal void CompLoop()
         {
             try
@@ -42,10 +47,20 @@ namespace ToolCore.Session
                     }
                 } //Grids loop
 
+                var dedicated = IsDedicated;
+                var tickMod60 = TickMod60;
+                var tickMod20 = TickMod20;
                 foreach (var comp in ToolMap.Values)
                 {
                     if (comp.Entity == null || comp.Entity.Closed || comp.Entity.MarkedForClose || (comp.IsBlock && comp.Grid != null && comp.Grid.MarkedForClose))
                         continue;
+
+                    //DS: idle block tools update on CompTick60, activated-idle on CompTick20
+                    if (dedicated && comp.IsBlock && comp.CompTick60 != tickMod60 && !comp.IsBusy
+                        && (!(comp._activated && comp.Enabled && comp.Powered && comp.Functional)
+                            || comp.AlignedUpdateInterval && comp.CompTick20 != tickMod20))
+                        continue;
+
                     var step = "";
                     try
                     {
@@ -113,8 +128,7 @@ namespace ToolCore.Session
                             var worldForward = Vector3D.Zero;
                             var worldUp = Vector3D.Zero;
 
-                            var fill = comp.Inventory.VolumeFillFactor;
-                            var needsPushing = comp.IsBlock ? comp.CompTick60 == TickMod60 && (fill > 0f || comp.Yields.Count > 0) : comp.CompTick60 == TickMod60 && comp.Yields.Count > 0;
+                            var needsPushing = comp.CompTick60 == TickMod60 && (comp.IsBlock ? comp.Inventory.VolumeFillFactor > 0f || comp.Yields.Count > 0 : comp.Yields.Count > 0);
                             if (IsServer && comp.Mode != ToolMode.Weld && needsPushing)
                             {
                                 if (comp.IsBlock)
@@ -286,7 +300,7 @@ namespace ToolCore.Session
                                     break;
                                 }
                             }
-                            else if (activated && !comp.IsBlock && !MySessionComponentSafeZones.IsActionAllowed(comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, (int)comp.Mode)))
+                            else if (activated && !comp.IsBlock && !MySessionComponentSafeZones.IsActionAllowed(comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, BoxedSafezoneAction(comp.Mode))))
                             {
                                 comp.Activated = false;
                                 break;
@@ -328,14 +342,14 @@ namespace ToolCore.Session
                                     if (entity is MyVoxelBase)
                                     {
                                         var voxelMatDef = ((MyVoxelBase)entity).GetMaterialAt(ref hitPos);
-                                        material = voxelMatDef?.MaterialTypeNameHash ?? MyStringHash.GetOrCompute("Rock");
+                                        material = voxelMatDef?.MaterialTypeNameHash ?? RockHash;
                                     }
                                     else if (entity is IMyCharacter)
-                                        material = MyStringHash.GetOrCompute("Character");
+                                        material = CharacterHash;
                                     else if (entity is MyEnvironmentSector)
-                                        material = MyStringHash.GetOrCompute("Tree");
+                                        material = TreeHash;
                                     else
-                                        material = MyStringHash.GetOrCompute("Metal");
+                                        material = MetalHash;
 
                                     if (def.Location == Location.Hit)
                                         worldPos = hitPos;

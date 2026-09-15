@@ -298,7 +298,7 @@ namespace ToolCore.Definitions
             Offset = (Vector3)values.Offset;
             EmitterName = values.Emitter;
             Rate = values.WorkRate > 0 ? values.WorkRate : int.MaxValue;
-            UpdateInterval = values.UpdateInterval;
+            UpdateInterval = System.Math.Max(values.UpdateInterval, values.Turret != null ? 2 : 1);
             ActivePower = values.ActivePower;
             IdlePower = values.IdlePower;
             DamageCharacters = values.DamageCharacters;

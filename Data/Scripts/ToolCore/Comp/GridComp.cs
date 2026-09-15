@@ -22,7 +22,7 @@ namespace ToolCore.Comp
         internal long CompTick20;
         internal long LastSafezoneTick = 0;
 
-        internal Dictionary<int, bool> SZAllowed = new Dictionary<int, bool>() { { 4, false }, { 8, false }, {16, false }};
+        internal readonly bool[] SZAllowed = new bool[17]; //indexed by (int)ToolMode
 
         internal bool UnderControl;
         internal bool Dirty;
@@ -87,9 +87,9 @@ namespace ToolCore.Comp
         internal void UpdateGridSafezone()
         {
             LastSafezoneTick = ToolSession.Tick;
-            SZAllowed[4] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, 4));
-            SZAllowed[8] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, 8));
-            SZAllowed[16] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, 16));
+            SZAllowed[4] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, Utils.Utils.BoxedSafezoneAction(ToolComp.ToolMode.Drill)));
+            SZAllowed[8] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, Utils.Utils.BoxedSafezoneAction(ToolComp.ToolMode.Weld)));
+            SZAllowed[16] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, Utils.Utils.BoxedSafezoneAction(ToolComp.ToolMode.Grind)));
         }
 
         private void FatBlockRemoved(MyCubeBlock block)

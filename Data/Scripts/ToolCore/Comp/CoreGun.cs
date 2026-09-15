@@ -110,7 +110,7 @@ namespace ToolCore.Comp
                 status = MyGunStatusEnum.Disabled;
                 return false;
             }
-            if (!_comp.Powered)
+            if (!_comp.Powered && !_comp.RefreshPowered())
             {
                 status = MyGunStatusEnum.OutOfPower;
                 return false;
@@ -125,7 +125,7 @@ namespace ToolCore.Comp
                 status = MyGunStatusEnum.AccessDenied;
                 return false;
             }
-            if (!MySessionComponentSafeZones.IsActionAllowed(_comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, (int)_comp.Mode), shooter))
+            if (!MySessionComponentSafeZones.IsActionAllowed(_comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, BoxedSafezoneAction(_comp.Mode)), shooter))
             {
                 status = MyGunStatusEnum.Failed;
                 return false;
