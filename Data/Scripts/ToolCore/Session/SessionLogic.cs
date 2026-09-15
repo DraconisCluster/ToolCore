@@ -46,6 +46,7 @@ namespace ToolCore.Session
                 {
                     if (comp.Entity == null || comp.Entity.Closed || comp.Entity.MarkedForClose || (comp.IsBlock && comp.Grid != null && comp.Grid.MarkedForClose))
                         continue;
+                    PerfVisits++;
                     var step = "";
                     try
                     {
