@@ -230,6 +230,7 @@
     <Compile Include="Data\Scripts\ToolCore\Comp\GridComp.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Data\Scripts\ToolCore\Session\PerfProbe.cs" />
     <Compile Include="Data\Scripts\ToolCore\Session\SessionRun.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>

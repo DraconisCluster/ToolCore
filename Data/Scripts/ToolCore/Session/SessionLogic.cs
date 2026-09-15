@@ -61,6 +61,7 @@ namespace ToolCore.Session
                             || comp.AlignedUpdateInterval && comp.CompTick20 != tickMod20))
                         continue;
 
+                    PerfVisits++;
                     var step = "";
                     try
                     {

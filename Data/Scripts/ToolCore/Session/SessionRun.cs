@@ -99,7 +99,10 @@ namespace ToolCore.Session
             Tick120 = Tick % 120 == 0;
             Tick600 = Tick % 600 == 0;
 
+            _perfWatch.Restart();
             CompLoop();
+            _perfWatch.Stop();
+            PerfRecord(_perfWatch.ElapsedTicks);
 
             if (!_startComps.IsEmpty || !_startGrids.IsEmpty)
                 StartComps();
